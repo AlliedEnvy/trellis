@@ -9,8 +9,11 @@ Dependencies
 - [PyGObject](http://sourceforge.net/projects/pygobjectwin32/files/)
 
 Windows: Python and PyGObject
+
 Debian-based distros: python-gi or python3-gi
+
 Fedora-based distros: pygobject2 or pygobject3
+
 Gentoo-based distros: pygobject
 
 TODO
