@@ -41,13 +41,13 @@ class TrellisWindow(Gtk.Window):
 		self.add(self.grid)
 
 		self.preview = Gtk.Window()
+		self.preview.set_name('preview')
 		self.preview.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 		self.preview.set_accept_focus(False)
 		self.preview.set_decorated(False)
 		#self.preview.set_resizable(False)
 		self.preview.set_keep_above(True)
 		self.preview.stick()
-		self.preview.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0.8, 1))
 		self.preview.show_all()
 		self.preview.set_opacity(0.4)
 		self.preview.hide()
@@ -225,7 +225,12 @@ class TrellisApp(Gtk.Application):
 		self.hold()
 
 		css = '''
-			.button { background-color: #08f; }
+			#preview {
+				background-color: rgb(0%, 80%, 100%);
+				border-width: 4px;
+				border-style: solid;
+				border-color: #ACF;
+			}
 		'''
 
 		style_provider = Gtk.CssProvider()
