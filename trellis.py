@@ -61,7 +61,7 @@ class TrellisWindow(Gtk.Window):
 				self.grid.attach(b, x, y, 1, 1)
 				b.connect('button-press-event', self.button_press_handler, x, y)
 				b.connect('button-release-event', self.button_release_handler, x, y)
-				b.connect('motion-notify-event', self.motion_handler, x, y)
+				b.connect('enter-notify-event', self.motion_handler, x, y)
 				b.add_events(Gdk.EventMask.POINTER_MOTION_MASK |
 				             Gdk.EventMask.BUTTON_PRESS_MASK |
 				             Gdk.EventMask.BUTTON_RELEASE_MASK)
@@ -77,10 +77,11 @@ class TrellisWindow(Gtk.Window):
 	def engage(self, *args):
 		rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
 		frame = self.get_window().get_frame_extents()
-		self.move((rect.width-frame.width)/2+rect.x, (rect.height-frame.height)/2+rect.y)
 		self.show()
+		self.move((rect.width-frame.width)/2+rect.x, (rect.height-frame.height)/2+rect.y)
 
 	def dismiss(self, *args):
+		self.preview.hide()
 		self.hide()
 
 	def button_press_handler(self, widget, event, x, y):
@@ -103,7 +104,6 @@ class TrellisWindow(Gtk.Window):
 
 	def button_release_handler(self, widget, event, bx, by):
 		if event.button != 1: return
-		print(bx, by)
 		if self.button_press:
 			min_x, min_y = min(bx, self.button_press['x']), min(by, self.button_press['y'])
 			max_x, max_y = max(bx, self.button_press['x']), max(by, self.button_press['y'])
@@ -163,6 +163,7 @@ class TrellisWindow(Gtk.Window):
 		for y in range(CONFIG['rows']):
 			for x in range(CONFIG['columns']):
 				self.grid.get_child_at(x, y).set_active(False)
+				self.grid.get_child_at(x, y).released()
 
 		if CONFIG['autoclose']: self.delete_handler()
 		self.preview.hide()
@@ -201,8 +202,8 @@ class TrellisWindow(Gtk.Window):
 		w = round(ux*(max_x-min_x+1))
 		h = round(uy*(max_y-min_y+1))
 
-		self.preview.get_window().move_resize(x, y, w, h)
 		self.preview.show()
+		self.preview.get_window().move_resize(x, y, w, h)
 		self.present() #this is a hack to keep preview below dialog
 		return True
 	
@@ -293,7 +294,6 @@ class TrellisApp(Gtk.Application):
 		while len(self.windows) > screen.get_n_monitors():
 			self.remove_window(self.windows[-1])
 			self.windows.pop().destroy()
-		print('redone!')
 
 if __name__ == '__main__':
 	app = TrellisApp()
