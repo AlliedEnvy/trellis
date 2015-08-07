@@ -4,9 +4,7 @@ from gi.repository import Gdk, Gtk, Gio
 import sys
 
 if sys.platform.startswith('win'):
-	from ctypes import windll
-	SW_MAXIMIZE = 3
-	SW_RESTORE = 9
+	import fixup_windows
 
 CONFIG = {
 	'rows': 6,
@@ -27,7 +25,6 @@ class TrellisWindow(Gtk.Window):
 
 		self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 		#self.set_position(Gtk.WindowPosition.CENTER_ALWAYS) #doesn't handle multi-monitor?
-		self.set_accept_focus(False)
 		self.set_resizable(False)
 		self.set_keep_above(True)
 		self.stick()
@@ -43,12 +40,12 @@ class TrellisWindow(Gtk.Window):
 		self.preview = Gtk.Window()
 		self.preview.set_name('preview')
 		self.preview.set_type_hint(Gdk.WindowTypeHint.UTILITY)
-		self.preview.set_accept_focus(False)
 		self.preview.set_decorated(False)
 		#self.preview.set_resizable(False)
 		self.preview.set_keep_above(True)
 		self.preview.stick()
 		self.preview.show_all()
+		self.preview.set_accept_focus(False)
 		self.preview.set_opacity(0.4)
 		self.preview.hide()
 
@@ -68,6 +65,7 @@ class TrellisWindow(Gtk.Window):
 
 		self.connect('delete-event', self.delete_handler)
 		self.show_all()
+		self.set_accept_focus(False)
 		self.set_opacity(0.8)
 
 	def delete_handler(self, *args):
@@ -110,39 +108,28 @@ class TrellisWindow(Gtk.Window):
 
 			rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
 
-			# Unfortunately, gdk_screen_get_active_window is unimplemented
-			# (returns NULL) for Win32. In addition, AFAICT PyGI doesn't
-			# introspect the function gdk_win32_window_lookup_for_display to
-			# lookup the GdkWindow for a HWND.
-			# So, we just do all the resizing using winapi.
-			if sys.platform.startswith('win'):
-				win = windll.user32.GetForegroundWindow()
-			else:
-				win = Gdk.Screen.get_default().get_active_window().get_effective_toplevel()
+			win = Gdk.Screen.get_default().get_active_window().get_effective_toplevel()
 
 			if min_x == 0 and min_y == 0 and max_x+1 == CONFIG['columns'] and max_y+1 == CONFIG['rows']:
-				if sys.platform.startswith('win'):
-					windll.user32.ShowWindow(win, SW_MAXIMIZE)	
-				else:
-					prev_monitor = Gdk.Screen.get_default().get_monitor_at_window(win)
-					if  prev_monitor != self.monitor:
-						# Unfortunately, we can't maximize to another monitor.
-						# So, we move the window to hopefully the least surprising
-						# position on the other monitor, before maximizing.
-						prev_rect = Gdk.Screen.get_default().get_monitor_workarea(prev_monitor)
-						prev_frame = win.get_frame_extents()
-						x = round(prev_frame.x/float(prev_rect.width)*rect.width)
-						y = round(prev_frame.y/float(prev_rect.height)*rect.height)
-						
-						x = min(x, rect.width - prev_frame.width)
-						y = min(y, rect.height - prev_frame.height)
+				prev_monitor = Gdk.Screen.get_default().get_monitor_at_window(win)
+				if  prev_monitor != self.monitor:
+					# Unfortunately, we can't maximize to another monitor.
+					# So, we move the window to hopefully the least surprising
+					# position on the other monitor, before maximizing.
+					prev_rect = Gdk.Screen.get_default().get_monitor_workarea(prev_monitor)
+					win.unmaximize()
+					prev_frame = win.get_frame_extents()
+					x = round(prev_frame.x/float(prev_rect.width)*rect.width)
+					y = round(prev_frame.y/float(prev_rect.height)*rect.height)
+					
+					x = min(x, rect.width - prev_frame.width)
+					y = min(y, rect.height - prev_frame.height)
 
-						x += rect.x
-						y += rect.y
-						
-						win.unmaximize()
-						win.move(x, y)
-					win.maximize()
+					x += rect.x
+					y += rect.y
+					
+					win.move(x, y)
+				win.maximize()
 			else:
 				ux = rect.width / float(CONFIG['columns'])
 				uy = rect.height / float(CONFIG['rows'])
@@ -152,12 +139,8 @@ class TrellisWindow(Gtk.Window):
 				w = round(ux*(max_x-min_x+1))
 				h = round(uy*(max_y-min_y+1))
 
-				if sys.platform.startswith('win'):
-					windll.user32.ShowWindow(win, SW_RESTORE)
-					windll.user32.MoveWindow(win, int(x), int(y), int(w), int(h), True)
-				else:
-					win.unmaximize()
-					win.move_resize(x, y, w, h)
+				win.unmaximize()
+				win.move_resize(x, y, w, h)
 
 		self.button_press = None
 		for y in range(CONFIG['rows']):
@@ -252,13 +235,13 @@ class TrellisApp(Gtk.Application):
 		self.menu.append(quit_item)
 		self.menu.show_all()
 
+		self.status_icon.connect('activate', self.status_activate)
+		self.status_icon.connect('popup-menu', self.status_popup_menu)
+
 		self.windows = []
 		self.redo_monitors(Gdk.Screen.get_default())
 		Gdk.Screen.get_default().connect('size-changed', self.redo_monitors)
 		#Gdk.Screen.get_default().connect('monitors-changed', self.redo_monitors)
-
-		self.status_icon.connect('activate', self.status_activate)
-		self.status_icon.connect('popup-menu', self.status_popup_menu)
 
 	def signal_shutdown(self, data=None):
 		self.quit()

@@ -20,7 +20,7 @@ TODO
 ---
 - handle resize cancellation (release drag off window or press esc)
 - ~~handle multi-monitor~~ Done? Test more.
-- complete Windows support
+- ~~complete Windows support~~ Done? Test more.
 - handle multi-workspace / multi-desktop (see possibly gdk_x11_screen_get_number_of_desktops, gdk_x11_screen_get_current_desktop, gdk_x11_window_move_to_(current_)desktop)
 - correctly resize client-side decorated windows with shadows (missing Gdk.Window.get_shadow_width(), GNOME Software or Files are good tests)
 - show window name? (missing Gdk.Window.get_title())
