@@ -90,7 +90,7 @@ def get_monitor_workarea(screen, mon):
 GWL_EXSTYLE = -20
 WS_EX_NOACTIVATE = 0x08000000
 SW_HIDE = 0
-SW_SHOW = 5
+SW_SHOWNOACTIVATE = 4
 old_set_accept_focus = Gtk.Window.set_accept_focus
 def set_accept_focus(win, accept):
 	old_set_accept_focus(win, accept)
@@ -100,7 +100,7 @@ def set_accept_focus(win, accept):
 		ctypes.windll.user32.ShowWindow(HWND, SW_HIDE)
 		style = ctypes.windll.user32.GetWindowLongW(HWND, GWL_EXSTYLE)
 		ctypes.windll.user32.SetWindowLongW(HWND, GWL_EXSTYLE, style | WS_EX_NOACTIVATE)
-		ctypes.windll.user32.ShowWindow(HWND, SW_SHOW)
+		ctypes.windll.user32.ShowWindow(HWND, SW_SHOWNOACTIVATE)
 
 # Monkey patch to our fixed functions
 Gdk.Screen.get_active_window = get_active_window
