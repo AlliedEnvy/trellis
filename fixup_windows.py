@@ -38,7 +38,7 @@ class PyGObjectCPAI(object):
 capi = PyGObjectCPAI()
 ####################
 
-# gdk_screen_get_active_window is unimplemented (returns NULL) for Win32.
+# gdk_win32_screen_get_active_window is unimplemented (returns NULL).
 # So, we implement it using winapi call GetForegroundWindow.
 def get_active_window(screen):
 	HWND = ctypes.windll.user32.GetForegroundWindow()
@@ -48,8 +48,8 @@ def get_active_window(screen):
 	win = capi.pygobject_new(winptr)
 	return win
 
-# gdk_screen_get_monitor_workarea is stubbed to use
-# gdk_screen_get_monitor_geometery on Win32. So, we implement it using winapi
+# gdk_win32_screen_get_monitor_workarea is stubbed to use
+# gdk_win32_screen_get_monitor_geometery. So, we implement it using winapi
 # call GetMonitorInfo.
 class RECT(ctypes.Structure):
 	_fields_ = [('left', ctypes.c_long),
@@ -83,7 +83,7 @@ def get_monitor_workarea(screen, mon):
 	rect.width, rect.height = wa.right-wa.left, wa.bottom-wa.top
 	return rect
 
-# gdk_window_set_accept_foucus(win, false) doesn't seem to work on Win32.
+# gdk_win32_window_set_accept_foucus(win, false) doesn't seem to work.
 # So, we reimplement using winapi SetWindowLong with WS_EX_NOACTIVATE.
 # Note that usually we'd also have to use WS_EX_APPWINDOW to make it appear
 # in the taskbar, but we don't want that anyway.

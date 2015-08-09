@@ -25,4 +25,7 @@ TODO
 - correctly resize client-side decorated windows with shadows (missing Gdk.Window.get_shadow_width(), GNOME Software or Files are good tests)
 - show window name? (missing Gdk.Window.get_title())
 - implement prefs/config storage, UI
+- global hotkey(s)
+- esc to close window
+- check OSX
 - [Slim PyGI installer](http://ascend4.org/Creating_slim_PyGI_installer_for_Windows)
