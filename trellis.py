@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # vim: set ts=4 sw=0 noet:
+from __future__ import absolute_import, division, print_function, unicode_literals
 from gi.repository import Gdk, Gtk, Gio
 import sys
 
 if sys.platform.startswith('win'):
-	import fixup_windows
+	from . import fixup_windows
 
 CONFIG = {
 	'rows': 6,
@@ -119,8 +120,8 @@ class TrellisWindow(Gtk.Window):
 					prev_rect = Gdk.Screen.get_default().get_monitor_workarea(prev_monitor)
 					win.unmaximize()
 					prev_frame = win.get_frame_extents()
-					x = round(prev_frame.x/float(prev_rect.width)*rect.width)
-					y = round(prev_frame.y/float(prev_rect.height)*rect.height)
+					x = round(prev_frame.x/prev_rect.width*rect.width)
+					y = round(prev_frame.y/prev_rect.height*rect.height)
 					
 					x = min(x, rect.width - prev_frame.width)
 					y = min(y, rect.height - prev_frame.height)
@@ -131,8 +132,8 @@ class TrellisWindow(Gtk.Window):
 					win.move(x, y)
 				win.maximize()
 			else:
-				ux = rect.width / float(CONFIG['columns'])
-				uy = rect.height / float(CONFIG['rows'])
+				ux = rect.width / CONFIG['columns']
+				uy = rect.height / CONFIG['rows']
 
 				x = round(ux*min_x + rect.x)
 				y = round(uy*min_y + rect.y)
@@ -170,8 +171,8 @@ class TrellisWindow(Gtk.Window):
 	
 	def preview_show(self, widget, event, bx, by):
 		rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
-		ux = rect.width / float(CONFIG['columns'])
-		uy = rect.height / float(CONFIG['rows'])
+		ux = rect.width / CONFIG['columns']
+		uy = rect.height / CONFIG['rows']
 
 		if self.button_press:
 			min_x, min_y = min(bx, self.button_press['x']), min(by, self.button_press['y'])
@@ -208,7 +209,7 @@ class TrellisApp(Gtk.Application):
 	def signal_startup(self, data=None):
 		self.hold()
 
-		css = '''
+		css = b'''
 			#preview {
 				background-color: rgb(0%, 80%, 100%);
 				border-width: 4px;
@@ -218,7 +219,7 @@ class TrellisApp(Gtk.Application):
 		'''
 
 		style_provider = Gtk.CssProvider()
-		style_provider.load_from_data(bytes(css.encode()))
+		style_provider.load_from_data(css)
 		Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
 				style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
