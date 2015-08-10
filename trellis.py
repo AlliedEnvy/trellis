@@ -225,13 +225,14 @@ class TrellisApp(Gtk.Application):
 
 		self.engaged = True
 
-		self.status_icon = Gtk.StatusIcon()
-		self.status_icon.set_from_icon_name('zoom-fit-best')
+		self.status_icon = Gtk.StatusIcon.new_from_icon_name('zoom-fit-best')
+		self.status_icon.set_name('Trellis')
+		self.status_icon.set_title('Trellis')
 		self.status_icon.set_tooltip_text('Trellis')
 		self.status_icon.set_visible(True)
 
 		self.menu = Gtk.Menu()
-		quit_item = Gtk.MenuItem('Quit')
+		quit_item = Gtk.MenuItem.new_with_mnemonic('_Quit')
 		quit_item.connect('activate', self.signal_shutdown)
 		self.menu.append(quit_item)
 		self.menu.show_all()
