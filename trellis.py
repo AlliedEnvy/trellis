@@ -5,7 +5,7 @@ from gi.repository import Gdk, Gtk, Gio
 import sys
 
 if sys.platform.startswith('win'):
-	from . import fixup_windows
+	import fixup_windows
 
 CONFIG = {
 	'rows': 6,

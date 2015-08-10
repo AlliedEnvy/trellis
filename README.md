@@ -4,7 +4,7 @@ Inspired by [Divvy](http://mizage.com/divvy/), [gTile](https://extensions.gnome.
 
 Dependencies
 ---
-- [Python 2.7+ or 3+](https://www.python.org/downloads/)
+- [Python 2.7+ or 3.1+](https://www.python.org/downloads/)
 - [GTK+ 3.10+](http://www.gtk.org/)
 - [PyGObject](http://sourceforge.net/projects/pygobjectwin32/files/)
 

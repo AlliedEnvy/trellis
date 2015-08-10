@@ -9,33 +9,37 @@ gdk.gdk_init()
 ####################
 # Code to convert a C pointer to a PyGObject
 # http://stackoverflow.com/questions/8668333/create-python-object-from-memory-address-using-gi-repository
+# Refactored to use Capsule instead of CObject
 class _PyGObject_Functions(ctypes.Structure):
-   _fields_ = [
-       ('register_class',
-        ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p,
-                          ctypes.c_int, ctypes.py_object,
-                          ctypes.py_object)),
-       ('register_wrapper',
-        ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.py_object)),
-       ('lookup_class',
-        ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_int)),
-       ('newgobj',
-        ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p)),
-       ]
+	_fields_ = [
+		('register_class',
+			ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p,
+				ctypes.c_int, ctypes.py_object, ctypes.py_object)),
+		('register_wrapper',
+			ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.py_object)),
+		('lookup_class',
+			ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_int)),
+		('newgobj',
+			ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p)),
+		]
 
-class PyGObjectCPAI(object):
-   def __init__(self):
-       PyCObject_AsVoidPtr = ctypes.pythonapi.PyCObject_AsVoidPtr
-       PyCObject_AsVoidPtr.restype = ctypes.c_void_p
-       PyCObject_AsVoidPtr.argtypes = [ctypes.py_object]
-       addr = PyCObject_AsVoidPtr(ctypes.py_object(
-           gi._gobject._PyGObject_API))
-       self._api = _PyGObject_Functions.from_address(addr)
+class PyGObjectCAPI(object):
+	def __init__(self):
+		self._as_void_ptr.restype = ctypes.c_void_p
+		self._as_void_ptr.argtypes = [ctypes.py_object]
+		addr = self._as_void_ptr(ctypes.py_object(
+			gi._gobject._PyGObject_API))
+		self._api = _PyGObject_Functions.from_address(addr)
 
-   def pygobject_new(self, addr):
-       return self._api.newgobj(addr)
+	@staticmethod
+	def _as_void_ptr(obj):
+		name = ctypes.pythonapi.PyCapsule_GetName(obj)
+		return ctypes.pythonapi.PyCapsule_GetPointer(obj, name)
 
-capi = PyGObjectCPAI()
+	def pygobject_new(self, addr):
+		return self._api.newgobj(addr)
+
+capi = PyGObjectCAPI()
 ####################
 
 # gdk_win32_screen_get_active_window is unimplemented (returns NULL).
