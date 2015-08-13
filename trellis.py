@@ -17,6 +17,8 @@ class TrellisButton(Gtk.ToggleButton):
 	def __init__(self):
 		Gtk.ToggleButton.__init__(self, label='')
 		#self.set_relief(Gtk.ReliefStyle.NONE)
+		self.set_hexpand(True)
+		self.set_vexpand(True)
 
 class TrellisWindow(Gtk.Window):
 	def __init__(self, monitor):
@@ -72,8 +74,9 @@ class TrellisWindow(Gtk.Window):
 
 	def engage(self, *args):
 		rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
-		frame = self.get_window().get_frame_extents()
 		self.show()
+		self.grid.set_size_request(rect.width * 0.2, rect.height * 0.2)
+		frame = self.get_window().get_frame_extents()
 		self.move((rect.width-frame.width)/2+rect.x, (rect.height-frame.height)/2+rect.y)
 
 	def dismiss(self, *args):
