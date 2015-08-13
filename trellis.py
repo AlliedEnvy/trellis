@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/env python
 # vim: set ts=4 sw=0 noet:
 from __future__ import absolute_import, division, print_function, unicode_literals
 from gi.repository import Gdk, Gtk, Gio
@@ -60,9 +60,6 @@ class TrellisWindow(Gtk.Window):
 				b.connect('button-press-event', self.button_press_handler, x, y)
 				b.connect('button-release-event', self.button_release_handler, x, y)
 				b.connect('enter-notify-event', self.motion_handler, x, y)
-				b.add_events(Gdk.EventMask.POINTER_MOTION_MASK |
-				             Gdk.EventMask.BUTTON_PRESS_MASK |
-				             Gdk.EventMask.BUTTON_RELEASE_MASK)
 
 		self.connect('delete-event', self.delete_handler)
 		self.show_all()

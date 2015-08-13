@@ -46,7 +46,7 @@ capi = PyGObjectCAPI()
 # So, we implement it using winapi call GetForegroundWindow.
 def get_active_window(screen):
 	HWND = ctypes.windll.user32.GetForegroundWindow()
-	if HWND == 0: return None
+	if not HWND: return None
 	display = gdk.gdk_display_get_default()
 	winptr = gdk.gdk_win32_window_foreign_new_for_display(display, HWND)
 	win = capi.pygobject_new(winptr)
@@ -100,7 +100,7 @@ def set_accept_focus(win, accept):
 	old_set_accept_focus(win, accept)
 	if not accept:
 		HWND = gdk.gdk_win32_window_get_handle(hash(win.get_window()))
-		if HWND == 0: return
+		if not HWND: return
 		ctypes.windll.user32.ShowWindow(HWND, SW_HIDE)
 		style = ctypes.windll.user32.GetWindowLongW(HWND, GWL_EXSTYLE)
 		ctypes.windll.user32.SetWindowLongW(HWND, GWL_EXSTYLE, style | WS_EX_NOACTIVATE)
