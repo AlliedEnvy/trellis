@@ -10,7 +10,7 @@ if sys.platform.startswith('win'):
 CONFIG = {
 	'rows': 6,
 	'columns': 12,
-	'autoclose': False
+	'autohide': False
 }
 
 class TrellisButton(Gtk.ToggleButton):
@@ -149,7 +149,7 @@ class TrellisWindow(Gtk.Window):
 				self.grid.get_child_at(x, y).set_active(False)
 				self.grid.get_child_at(x, y).released()
 
-		if CONFIG['autoclose']: self.delete_handler()
+		if CONFIG['autohide']: self.delete_handler()
 		self.preview.hide()
 		return True
 

@@ -16,6 +16,21 @@ Fedora-based distros: pygobject2 or pygobject3
 
 Gentoo-based distros: pygobject
 
+Use
+---
+Run trellis.py . Trellis will create a tray icon and show its windows, one per monitor. Trellis's windows can be used to resize the focused window according to Trellis's grid.
+
+You can hide Trellis's windows by closing one; clicking on the tray icon will toggle Trellis's shown/hidden state. Re-running trellis.py will also show Trellis's windows; a second Trellis process will not be created.
+
+To quit Trellis, right-click the tray icon, and select Quit.
+
+Trellis can be configured by editing the CONFIG dictionary near the top of trellis.py . Trellis will need to be restarted after changing the configuration. Configuration variables:
+- rows: the height of the Trellis grid.
+- columns: the width of the Trellis grid.
+- autohide:
+  - if True, hide Trellis's windows after resizing a window with it.
+  - if False, leave Trellis's windows shown after resizing a window with it.
+
 TODO
 ---
 - handle resize cancellation (release drag off window or press esc)
