@@ -15,7 +15,7 @@ CONFIG = {
 
 class TrellisButton(Gtk.ToggleButton):
 	def __init__(self):
-		Gtk.ToggleButton.__init__(self, label='')
+		Gtk.ToggleButton.__init__(self)
 		#self.set_relief(Gtk.ReliefStyle.NONE)
 		self.set_hexpand(True)
 		self.set_vexpand(True)
@@ -25,6 +25,7 @@ class TrellisWindow(Gtk.Window):
 		Gtk.Window.__init__(self, title='Trellis')
 
 		self.monitor = monitor
+		rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
 
 		self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
 		#self.set_position(Gtk.WindowPosition.CENTER_ALWAYS) #doesn't handle multi-monitor?
@@ -36,6 +37,7 @@ class TrellisWindow(Gtk.Window):
 		#self.set_skip_taskbar_hint(True)
 
 		self.grid = Gtk.Grid()
+		self.grid.set_size_request(rect.width * 0.2, rect.height * 0.2)
 		#self.grid.set_row_spacing(4)
 		#self.grid.set_column_spacing(4)
 		self.add(self.grid)
