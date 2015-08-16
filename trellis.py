@@ -144,6 +144,10 @@ class TrellisWindow(Gtk.Window):
 
 				win.unmaximize()
 				win.move_resize(x, y, w, h)
+				# work around WM not doing exact move-resize
+				frame = win.get_frame_extents()
+				win.move_resize(x+x-frame.x, y+y-frame.y,
+						w+w-frame.width, h+h-frame.height)
 
 		self.button_press = None
 		for y in range(CONFIG['rows']):
