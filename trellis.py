@@ -137,17 +137,16 @@ class TrellisWindow(Gtk.Window):
 				ux = rect.width / CONFIG['columns']
 				uy = rect.height / CONFIG['rows']
 
+				win.unmaximize()
+				frame = win.get_frame_extents()
+				geom = win.get_geometry()
+
 				x = round(ux*min_x + rect.x)
 				y = round(uy*min_y + rect.y)
-				w = round(ux*(max_x-min_x+1))
-				h = round(uy*(max_y-min_y+1))
+				w = round(ux*(max_x-min_x+1)) + geom[2]-frame.width
+				h = round(uy*(max_y-min_y+1)) + geom[3]-frame.height
 
-				win.unmaximize()
 				win.move_resize(x, y, w, h)
-				# work around WM not doing exact move-resize
-				frame = win.get_frame_extents()
-				win.move_resize(x+x-frame.x, y+y-frame.y,
-						w+w-frame.width, h+h-frame.height)
 
 		self.button_press = None
 		for y in range(CONFIG['rows']):
