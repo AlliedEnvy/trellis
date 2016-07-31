@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 # vim: set ts=4 sw=0 noet:
 from __future__ import absolute_import, division, print_function, unicode_literals
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
 from gi.repository import Gdk, Gtk, Gio
 import sys
 
