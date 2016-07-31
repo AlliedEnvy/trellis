@@ -2,8 +2,8 @@
 import gi
 from gi.repository import Gdk, Gtk, cairo
 
-import ctypes, ctypes.util
-gdk = ctypes.CDLL(ctypes.util.find_library('libgdk-3-0'))
+import ctypes
+gdk = ctypes.CDLL('libgdk-3-0.dll')
 gdk.gdk_init()
 
 ####################
