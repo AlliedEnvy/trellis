@@ -40,6 +40,13 @@ class TrellisWindow(Gtk.Window):
 		self.grid.set_size_request(rect.width * 0.2, rect.height * 0.2)
 		#self.grid.set_row_spacing(4)
 		#self.grid.set_column_spacing(4)
+
+		self.gesture = Gtk.GestureDrag.new(self.grid)
+		self.gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+		self.gesture.set_button(1)
+		self.gesture.connect('drag-update', self.drag_update_handler)
+		self.gesture.connect('drag-end', self.drag_end_handler)
+
 		self.add(self.grid)
 
 		self.preview = Gtk.Window()
@@ -56,14 +63,11 @@ class TrellisWindow(Gtk.Window):
 
 		self.connect('leave-notify-event', self.preview_hide)
 
-		self.button_press = None
 		for y in range(CONFIG['rows']):
 			for x in range(CONFIG['columns']):
 				b = TrellisButton()
 				self.grid.attach(b, x, y, 1, 1)
-				b.connect('button-press-event', self.button_press_handler, x, y)
-				b.connect('button-release-event', self.button_release_handler, x, y)
-				b.connect('enter-notify-event', self.motion_handler, x, y)
+				b.connect('enter-notify-event', self.preview_show, x, y)
 
 		self.connect('delete-event', self.delete_handler)
 		self.show_all()
@@ -82,35 +86,27 @@ class TrellisWindow(Gtk.Window):
 		self.move((rect.width-frame.width)/2+rect.x, (rect.height-frame.height)/2+rect.y)
 
 	def dismiss(self, *args):
+		self.gesture.emit("cancel", None)
+		
 		self.preview.hide()
 		self.hide()
 
-	def button_press_handler(self, widget, event, x, y):
-		if event.button != 1: return
-		if not self.button_press:
-			self.button_press = {'x':x, 'y':y}
-		#TODO: this is a hack! check into GtkGestureDrag, since 3.14
-		'''
-17:16	Jasper	You would have to use event.get_device().ungrab(), I think
-17:16	Jasper	event.get_device().ungrab(0)
-17:16	Jasper	try that for now, it's an awful hack but it might just work
-17:17	Jasper	I have no idea if it's possible to prevent the implicit grab on csw
-17:17	AlliedEnvy	Jasper, it works! Thanks :)
-17:18	garnacho_	that would do the job, I would advise GtkGestureDrag in the capture phase on the button container though
-17:18	Jasper	AlliedEnvy, be aware that weird things might start breaking -- just keep that in mind.
-17:18	Jasper	ah, yeah, the new gestures
-17:18	Jasper	haven't played around with those yet
-		'''
-		event.get_device().ungrab(0)
+	def point_to_grid(self, x, y):
+		w = self.grid.get_allocated_width()
+		h = self.grid.get_allocated_height()
+		if x < 0 or y < 0 or x >= w or y >= h:
+			return None
+		return ((x*CONFIG['columns'])//w, (y*CONFIG['rows'])//h)
 
-	def button_release_handler(self, widget, event, bx, by):
-		if event.button != 1: return
-		if self.button_press:
-			min_x, min_y = min(bx, self.button_press['x']), min(by, self.button_press['y'])
-			max_x, max_y = max(bx, self.button_press['x']), max(by, self.button_press['y'])
+	def drag_end_handler(self, gesture, offset_x, offset_y):
+		start = gesture.get_start_point()
+		pt = self.point_to_grid(offset_x + start[1], offset_y + start[2])
+		start = self.point_to_grid(start[1], start[2])
+		if pt:
+			min_x, min_y = min(start[0], pt[0]), min(start[1], pt[1])
+			max_x, max_y = max(start[0], pt[0]), max(start[1], pt[1])
 
 			rect = Gdk.Screen.get_default().get_monitor_workarea(self.monitor)
-
 			win = Gdk.Screen.get_default().get_active_window().get_effective_toplevel()
 
 			if min_x == 0 and min_y == 0 and max_x+1 == CONFIG['columns'] and max_y+1 == CONFIG['rows']:
@@ -148,22 +144,26 @@ class TrellisWindow(Gtk.Window):
 
 				win.move_resize(x, y, w, h)
 
-		self.button_press = None
+			if CONFIG['autohide']: self.delete_handler()
+
 		for y in range(CONFIG['rows']):
 			for x in range(CONFIG['columns']):
 				self.grid.get_child_at(x, y).set_active(False)
 				self.grid.get_child_at(x, y).released()
 
-		if CONFIG['autohide']: self.delete_handler()
 		self.preview.hide()
-		return True
 
-	def motion_handler(self, widget, event, bx, by):
-		self.preview_show(widget, event, bx, by)
+	def drag_update_handler(self, gesture, offset_x, offset_y):
+		start = gesture.get_start_point()
+		pt = self.point_to_grid(offset_x + start[1], offset_y + start[2])
+		start = self.point_to_grid(start[1], start[2])
+		if not pt:
+			self.preview.hide()
+		else:
+			self.preview_show(None, None, pt[0], pt[1])
 
-		if self.button_press:
-			min_x, min_y = min(bx, self.button_press['x']), min(by, self.button_press['y'])
-			max_x, max_y = max(bx, self.button_press['x']), max(by, self.button_press['y'])
+			min_x, min_y = min(start[0], pt[0]), min(start[1], pt[1])
+			max_x, max_y = max(start[0], pt[0]), max(start[1], pt[1])
 
 			for y in range(CONFIG['rows']):
 				for x in range(CONFIG['columns']):
@@ -179,9 +179,13 @@ class TrellisWindow(Gtk.Window):
 		ux = rect.width / CONFIG['columns']
 		uy = rect.height / CONFIG['rows']
 
-		if self.button_press:
-			min_x, min_y = min(bx, self.button_press['x']), min(by, self.button_press['y'])
-			max_x, max_y = max(bx, self.button_press['x']), max(by, self.button_press['y'])
+		if self.gesture.is_active():
+			start = self.gesture.get_start_point()
+			offset = self.gesture.get_offset()
+			pt = self.point_to_grid(start[1] + offset[1], start[2] + offset[2])
+			start = self.point_to_grid(start[1], start[2])
+			min_x, min_y = min(start[0], pt[0]), min(start[1], pt[1])
+			max_x, max_y = max(start[0], pt[0]), max(start[1], pt[1])
 		else:
 			min_x, min_y = bx, by
 			max_x, max_y = bx, by

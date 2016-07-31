@@ -5,7 +5,7 @@ Inspired by [Divvy](http://mizage.com/divvy/), [gTile](https://extensions.gnome.
 Dependencies
 ---
 - [Python 2.7+ or 3.1+](https://www.python.org/downloads/)
-- [GTK+ 3.10+](http://www.gtk.org/)
+- [GTK+ 3.14+](http://www.gtk.org/)
 - [PyGObject](http://sourceforge.net/projects/pygobjectwin32/files/)
 
 Windows: Python and PyGObject
@@ -33,7 +33,7 @@ Trellis can be configured by editing the CONFIG dictionary near the top of trell
 
 TODO
 ---
-- handle resize cancellation (release drag off window or press esc)
+- handle resize cancellation (~~release drag off window~~ or press esc)
 - ~~handle multi-monitor~~ Done? Test more.
 - ~~complete Windows support~~ Done? Test more.
 - handle multi-workspace / multi-desktop (see possibly gdk_x11_screen_get_number_of_desktops, gdk_x11_screen_get_current_desktop, gdk_x11_window_move_to_(current_)desktop)
